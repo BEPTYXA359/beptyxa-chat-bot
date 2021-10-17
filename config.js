@@ -1,5 +1,5 @@
 module.exports = {
-    TOKEN: "",
+    TOKEN: process.env.TG_BOT_TOKEN,
     HEADERS: {
         follow_max: 10,
         follow_set_cookies: true,
