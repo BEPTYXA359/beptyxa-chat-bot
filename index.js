@@ -7,8 +7,9 @@ const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
 const MAX_ATTEMPTS = 3;
 const REGEXP_HASHTAG = /#\S+/g;
+const REGEXP_LINK = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
 
-bot.on('text', async (ctx) => {
+bot.hears(REGEXP_LINK, async (ctx) => {
 
     console.log(`-> from ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: ${ctx.message.text}`)
 
