@@ -6,7 +6,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
 const MAX_ATTEMPTS = 3;
-const REGEXP_HASHTAG = /\#\w\w+\s?/g;
+const REGEXP_HASHTAG = /#\S+/g;
 
 bot.on('text', async (ctx) => {
 
