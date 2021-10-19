@@ -7,13 +7,13 @@ const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
 const MAX_ATTEMPTS = 3;
 const REGEXP_HASHTAG = /#\S+/g;
-const REGEXP_LINK = /(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})/gi;
+const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
 
 bot.hears(REGEXP_LINK, async (ctx) => {
 
     console.log(`-> from ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: ${ctx.message.text}`)
 
-    if (ctx.message.text.includes('tiktok.com')) {
+    if (ctx.message.text.toLowerCase().includes('tiktok.com')) {
         await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
 
         //attempt loop
