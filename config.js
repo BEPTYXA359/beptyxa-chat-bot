@@ -1,5 +1,7 @@
 module.exports = {
     TOKEN: process.env.TG_BOT_TOKEN,
+    WH_ADDRESS: process.env.WH_ADDRESS,
+    WH_PORT: process.env.WH_PORT,
     HEADERS: {
         follow_max: 10,
         follow_set_cookies: true,
@@ -10,7 +12,7 @@ module.exports = {
             Origin: "https://www.tiktok.com",
         },
         cookies: {
-            tt_webid_v2: ''
+            tt_webid_v2: '689854141086886123'
         }
     }
 };

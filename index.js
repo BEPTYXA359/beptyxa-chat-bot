@@ -1,5 +1,6 @@
 const {Telegraf} = require('telegraf');
 const TikTokScraper = require('tiktok-scraper');
+require('dotenv').config();
 const BOT_CONFIG = require("./config");
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
@@ -14,7 +15,7 @@ bot.hears(REGEXP_LINK, async (ctx) => {
     console.log(`-> from ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: ${ctx.message.text}`)
 
     if (ctx.message.text.toLowerCase().includes('tiktok.com')) {
-        await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
+        await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
 
         //attempt loop
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
@@ -26,6 +27,7 @@ bot.hears(REGEXP_LINK, async (ctx) => {
 
                 console.log(`<- to ${ctx.message.from.first_name} ${ctx.message.from.last_name}: TikTok Video Success`)
                 //send video to chat
+                await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
                 await ctx.replyWithVideo({source: buffer},
                     {
                         caption:
@@ -49,4 +51,13 @@ bot.hears(REGEXP_LINK, async (ctx) => {
     }
 })
 
-bot.launch();
+// Start webhook via launch method (preferred)
+bot.launch({
+    webhook: {
+        domain: BOT_CONFIG.WH_ADDRESS,
+        port: BOT_CONFIG.WH_PORT
+    }
+})
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'))
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
