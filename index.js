@@ -55,7 +55,7 @@ bot.hears(REGEXP_LINK, async (ctx) => {
 bot.launch({
     webhook: {
         domain: BOT_CONFIG.WH_ADDRESS,
-        port: BOT_CONFIG.WH_PORT
+        port: process.env.PORT
     }
 })
 // Enable graceful stop
