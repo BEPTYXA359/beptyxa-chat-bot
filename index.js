@@ -23,12 +23,12 @@ bot.hears(REGEXP_LINK, async (ctx) => {
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             try {
                 await delay(attempt * 5000)
+
                 //Load video data
                 const videoMeta = await TikTokScraper.getVideoMeta(ctx.message.text, BOT_CONFIG.HEADERS);
                 const video = await fetch(videoMeta.collector[0].videoUrl, BOT_CONFIG.HEADERS);
                 const buffer = await video.buffer();
 
-                console.log(`<- to ${ctx.message.from.first_name} ${ctx.message.from.last_name}: TikTok Video Success`)
                 //send video to chat
                 await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
                 await ctx.replyWithVideo({source: buffer},
@@ -41,14 +41,23 @@ bot.hears(REGEXP_LINK, async (ctx) => {
 
                 //delete video url
                 ctx.deleteMessage(ctx.message.id);
-
+                console.log(`<- to ${ctx.message.from.first_name} ${ctx.message.from.last_name}: TikTok Video Success`)
             } catch (error) {
                 //if last attempt send error
                 if (attempt === MAX_ATTEMPTS - 1) {
                     console.log(`<- to ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: TikTok Video Failed - ${error}`)
-                    ctx.reply(`ERROR TikTok: ${error}`)
+                    await ctx.replyWithPhoto({source: 'images/papichzol.jpeg'}, {caption: `ERROR TikTok: ${error}`});
                 } else {
-                    ctx.replyWithPhoto({source: 'images/papichsec.jpeg'}, {caption: 'ВОТ СЕЙЧАС НЕ ПОНЯЛ СЕКУНДОЧКУ ПЛЮС МИНУТОЧКУ'});
+                    switch (attempt){
+                        case 0:
+                            await ctx.replyWithPhoto({source: 'images/papichsec.jpeg'}, {caption: 'ВОТ СЕЙЧАС НЕ ПОНЯЛ СЕКУНДОЧКУ ПЛЮС МИНУТОЧКУ'});
+                            break;
+                        case 3:
+                            await ctx.replyWithPhoto({source: 'images/papichlast.jpeg'}, {caption: 'ТАК ПОСЛЕДНЯЯ ГАЙС'});
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }
