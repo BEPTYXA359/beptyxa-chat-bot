@@ -6,9 +6,11 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
-const MAX_ATTEMPTS = 3;
+const MAX_ATTEMPTS = 4;
 const REGEXP_HASHTAG = /#\S+/g;
 const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
+
+const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 bot.hears(REGEXP_LINK, async (ctx) => {
 
@@ -20,6 +22,7 @@ bot.hears(REGEXP_LINK, async (ctx) => {
         //attempt loop
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             try {
+                await delay(attempt * 5000)
                 //Load video data
                 const videoMeta = await TikTokScraper.getVideoMeta(ctx.message.text, BOT_CONFIG.HEADERS);
                 const video = await fetch(videoMeta.collector[0].videoUrl, BOT_CONFIG.HEADERS);
@@ -27,7 +30,7 @@ bot.hears(REGEXP_LINK, async (ctx) => {
 
                 console.log(`<- to ${ctx.message.from.first_name} ${ctx.message.from.last_name}: TikTok Video Success`)
                 //send video to chat
-                await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
+                await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
                 await ctx.replyWithVideo({source: buffer},
                     {
                         caption:
@@ -44,6 +47,8 @@ bot.hears(REGEXP_LINK, async (ctx) => {
                 if (attempt === MAX_ATTEMPTS - 1) {
                     console.log(`<- to ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: TikTok Video Failed - ${error}`)
                     ctx.reply(`ERROR TikTok: ${error}`)
+                } else {
+                    ctx.replyWithPhoto({source: 'images/papichsec.jpeg'}, {caption: 'ВОТ СЕЙЧАС НЕ ПОНЯЛ СЕКУНДОЧКУ ПЛЮС МИНУТОЧКУ'});
                 }
             }
         }
@@ -55,7 +60,7 @@ bot.hears(REGEXP_LINK, async (ctx) => {
 bot.launch({
     webhook: {
         domain: BOT_CONFIG.WH_ADDRESS,
-        port: process.env.PORT
+        port: process.env.PORT || BOT_CONFIG.WH_PORT
     }
 })
 // Enable graceful stop
