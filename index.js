@@ -12,7 +12,9 @@ const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms))
 
-bot.hears(REGEXP_LINK, async (ctx) => {
+bot.on('text', async (ctx) => {
+    //skip if not a link
+    if (!REGEXP_LINK.test(ctx.message.text)) return;
 
     console.log(`-> from ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: ${ctx.message.text}`)
 
@@ -79,3 +81,6 @@ bot.launch({
         port: process.env.PORT || BOT_CONFIG.WH_PORT
     }
 })
+// Enable graceful stop
+process.once('SIGINT', () => bot.stop('SIGINT'))
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
