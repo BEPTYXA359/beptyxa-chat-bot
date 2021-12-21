@@ -24,7 +24,7 @@ bot.on('text', async (ctx) => {
         //attempt loop
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             try {
-                await delay(attempt * 5000)
+                await delay(5000)
 
                 //Load video data
                 const videoMeta = await TikTokScraper.getVideoMeta(ctx.message.text, BOT_CONFIG.HEADERS);
