@@ -65,6 +65,13 @@ bot.hears(REGEXP_LINK, async (ctx) => {
     }
 })
 
+bot.hears('STOP_BOT', (ctx) =>{
+    if (ctx.message.from.username === process.env.OWNER_USERNAME){
+        console.log('BOT STOPPED')
+        bot.stop('SIGTERM')
+    }
+})
+
 // Start webhook via launch method (preferred)
 bot.launch({
     webhook: {
@@ -72,6 +79,3 @@ bot.launch({
         port: process.env.PORT || BOT_CONFIG.WH_PORT
     }
 })
-// Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
