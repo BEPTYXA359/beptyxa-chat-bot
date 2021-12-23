@@ -6,7 +6,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 
 const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
-const MAX_ATTEMPTS = 4;
+const MAX_ATTEMPTS = 2;
 const REGEXP_HASHTAG = /#\S+/g;
 const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
 
@@ -24,7 +24,7 @@ bot.on('text', async (ctx) => {
         //attempt loop
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
             try {
-                await delay(5000)
+                await delay(10 * 1000)
 
                 //Load video data
                 const videoMeta = await TikTokScraper.getVideoMeta(ctx.message.text, BOT_CONFIG.HEADERS);
