@@ -1,80 +1,62 @@
 const {Telegraf} = require('telegraf');
-const needle = require('needle');
+require('dotenv').config();
+const schedule = require('node-schedule');
+
 const cheerio = require('cheerio');
-require('dotenv').config()
+const needle = require('needle');
 
 const BOT_CONFIG = require("./config");
 const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
-const MAX_ATTEMPTS = 3;
-const REGEXP_HASHTAG = /#\S+/g;
-const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-bot.hears(REGEXP_LINK,async (ctx) => {
+let goodMorningJob;
 
-    console.log(`-> from ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: ${ctx.message.text}`)
-
-    if (ctx.message.text.toLowerCase().includes('tiktok.com')) {
-        try {
-            await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
-            await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
-
-            let link = ctx.message.text,
-                data = null,
-                $ = null,
-                isRedirected = false;
-
-            do {
-                data = await needle('get', link, {headers: BOT_CONFIG.HEADERS});
-                $ = cheerio.load(data.body);
-                if (!$('div').html() && $('a').html() && $('a').attr('href')){
-                    link = $('a').attr('href');
-                } else {
-                    isRedirected = true;
-                }
-            } while (!isRedirected)
-
-            console.log($.html())
-        }catch (error){
-            console.log(`<- to ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: TikTok Video Failed - ${error}`)
-            ctx.reply(`ERROR TikTok: ${error}`)
-        }
-    }
-
-
-
-        // //attempt loop
-        // for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-        //     try {
-        //         //Load video data
-        //         const videoMeta = await TikTokScraper.getVideoMeta(ctx.message.text, BOT_CONFIG.HEADERS);
-        //         const video = await fetch(videoMeta.collector[0].videoUrl, BOT_CONFIG.HEADERS);
-        //         const buffer = await video.buffer();
-        //
-        //         console.log(`<- to ${ctx.message.from.first_name} ${ctx.message.from.last_name}: TikTok Video Success`)
-        //         //send video to chat
-        //         await ctx.replyWithVideo({source: buffer},
-        //             {
-        //                 caption:
-        //                     `-> ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}\n${videoMeta.collector[0].text.replace(REGEXP_HASHTAG, '')}`
-        //             })
-        //
-        //         attempt = MAX_ATTEMPTS;
-        //
-        //         //delete video url
-        //         ctx.deleteMessage(ctx.message.id);
-        //
-        //     } catch (error) {
-        //         //if last attempt send error
-        //         if (attempt === MAX_ATTEMPTS - 1) {
-        //             console.log(`<- to ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: TikTok Video Failed - ${error}`)
-        //             ctx.reply(`ERROR TikTok: ${error}`)
-        //         }
-        //     }
+bot.command('help', (ctx) => {
+    ctx.reply(`/enableMorning - Включить доброе утро
+/disableMorning - Выключить доброе утро`)
 })
 
-bot.launch();
+bot.command('enableMorning', async (ctx) => {
+    ctx.reply('Влючаю доброе утро)')
+    goodMorningJob = schedule.scheduleJob({ hour:10 }, async ()=> {
+        let morning = {};
+        do {
+            try {
+                const response = await needle('get', 'https://otkrytki-besplatno.ru/');
+                const $ = cheerio.load(response.body);
+                morning.text = $('.nsp_arts.bottom img[alt*="утр"]').attr('alt');
+                morning.image = 'https://otkrytki-besplatno.ru' + $('.nsp_arts.bottom img[alt*="утр"]').attr('src');
+            } catch (error) {
+                morning.error = `Что то не так с открыткой: ${error}`;
+                ctx.reply('Что то не так с открыткой: ', error);
+            }
+        } while (morning.text === undefined || morning.error !== undefined)
+        const image = await fetch(morning.image);
+        const buffer = await image.buffer();
+        await ctx.replyWithAnimation({source: buffer},{ caption: morning.text });
+        console.log(morning)
+    })
+})
+bot.command('disableMorning', (ctx) => {
+    goodMorningJob.cancel();
+    ctx.reply('Ладно, больше не буду(')
+})
+
+// Start webhook via launch method (preferred)
+bot.launch({
+    webhook: {
+        domain: BOT_CONFIG.WH_ADDRESS,
+        port: process.env.PORT || BOT_CONFIG.WH_PORT
+    }
+})
 
 // Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+process.once('SIGINT', () => {
+    schedule.gracefulShutdown();
+    bot.stop('SIGINT');
+})
+process.once('SIGTERM', () => {
+    schedule.gracefulShutdown();
+    bot.stop('SIGTERM');
+})
