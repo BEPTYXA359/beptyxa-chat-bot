@@ -4,17 +4,22 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
     "start": "node index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "BEPTYXA359",
   "license": "ISC",
   "dependencies": {
-    "async": "^3.2.2",
+    "canvas": "^2.8.0",
+    "cheerio": "^1.0.0-rc.10",
     "dotenv": "^10.0.0",
-    "node-fetch": "^3.1.0",
-    "telegraf": "^4.5.2",
-    "tiktok-scraper": "^1.4.36"
+    "jsdom": "^19.0.0",
+    "needle": "^3.0.0",
+    "node-schedule": "^2.1.0",
+    "telegraf": "^4.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }
