@@ -24,7 +24,7 @@ redisClient.on("connect", async ()=>{
     console.log("Good Morning Id: ", goodMorningChatId);
 })
 
-await redisClient.connect();
+redisClient.connect();
 
 bot.command('help', (ctx) => {
     ctx.reply(`/enableMorning - Включить доброе утро
