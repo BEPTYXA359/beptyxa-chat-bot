@@ -65,10 +65,10 @@ bot.command('disableMorning', (ctx) => {
 
 // Start webhook via launch method (preferred)
 bot.launch({
-    // webhook: {
-    //     domain: BOT_CONFIG.WH_ADDRESS,
-    //     port: process.env.PORT || BOT_CONFIG.WH_PORT
-    // }
+    webhook: {
+        domain: BOT_CONFIG.WH_ADDRESS,
+        port: process.env.PORT || BOT_CONFIG.WH_PORT
+    }
 })
 
 function enableMorningJob(chatId){
