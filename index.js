@@ -14,16 +14,17 @@ const redis = require('redis');
 const redisURL = process.env.REDIS_URL;
 
 const redisClient = redisURL ? redis.createClient({url: redisURL}) : redis.createClient();
-redisClient.connect();
 
 redisClient.on("connect", async ()=>{
-    console.log("redis connected")
+    console.log("redis connected to", process.env.REDIS_URL)
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
     goodMorningChatId.forEach(chatId => {
         enableMorningJob(chatId);
     })
     console.log("Good Morning Id: ", goodMorningChatId);
 })
+
+await redisClient.connect();
 
 bot.command('help', (ctx) => {
     ctx.reply(`/enableMorning - Включить доброе утро
@@ -34,16 +35,16 @@ bot.command('status', async (ctx) => {
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
     if (goodMorningChatId.includes(ctx.chat.id)){
         console.log("Morning Status: ENABLED")
-        ctx.reply("Морнинг енаблед")
+        ctx.reply("Морнинг енаблед)")
     } else {
         console.log("Morning Status: DISABLED")
-        ctx.reply("Морнинг дисаблед")
+        ctx.reply("Морнинг дисаблед)")
     }
 
 })
 
 bot.command('enableMorning', async (ctx) => {
-    ctx.reply('Влючаю доброе утро)')
+    ctx.reply('Влючаю гудморниг)')
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
     if (!goodMorningChatId.includes(ctx.chat.id)){
         goodMorningChatId.push(ctx.chat.id);
@@ -57,15 +58,15 @@ bot.command('disableMorning', async (ctx) => {
         goodMorningChatId.splice(goodMorningChatId.indexOf(ctx.chat.id), 1);
     }
     await redisClient.set("goodMorningChatId", JSON.stringify(goodMorningChatId));
-    ctx.reply('Ладно, больше не буду(')
+    ctx.reply('Ладно, больше не буду гудмонинговать(')
 })
 
 // Start webhook via launch method (preferred)
 bot.launch({
-    webhook: {
-        domain: BOT_CONFIG.WH_ADDRESS,
-        port: process.env.PORT || BOT_CONFIG.WH_PORT
-    }
+    // webhook: {
+    //     domain: BOT_CONFIG.WH_ADDRESS,
+    //     port: process.env.PORT || BOT_CONFIG.WH_PORT
+    // }
 }).then(()=>{
     console.log("started")
     console.log()
