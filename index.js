@@ -10,56 +10,53 @@ const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-const LocalSession = require('telegraf-session-local');
+const redis = require('redis');
+const redisURL = process.env.REDIS_URL;
 
-const localSession = new LocalSession({
-    // Database name/path, where sessions will be located (default: 'sessions.json')
-    database: 'sessions.json',
-    // Name of session property object in Telegraf Context (default: 'session')
-    property: 'session',
-    // Type of lowdb storage (default: 'storageFileSync')
-    storage: LocalSession.storageFileAsync,
-    // Format of storage/database (default: JSON.stringify / JSON.parse)
-    format: {
-        serialize: (obj) => JSON.stringify(obj, null, 2), // null & 2 for pretty-formatted JSON
-        deserialize: (str) => JSON.parse(str),
-    },
-})
+const redisClient = redisURL ? redis.createClient({url: redisURL}) : redis.createClient();
+redisClient.connect();
 
-// Wait for database async initialization finished (storageFileAsync or your own asynchronous storage adapter)
-localSession.DB.then(DB => {
-    // Database now initialized, so now you can retrieve anything you want from it
-    let sessions = DB.value().sessions;
-    sessions.forEach(session => {
-        if (session.data?.goodMorningJob?.enabled){
-            enableMorningJob(session.data.goodMorningJob.chatId)
-        }
+redisClient.on("connect", async ()=>{
+    console.log("redis connected")
+    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    goodMorningChatId.forEach(chatId => {
+        enableMorningJob(chatId);
     })
-    console.log('Current LocalSession DB:', sessions)
-    // console.log(DB.get('sessions').getById('1:1').value())
+    console.log("Good Morning Id: ", goodMorningChatId);
 })
-
-bot.use(localSession.middleware())
 
 bot.command('help', (ctx) => {
     ctx.reply(`/enableMorning - Включить доброе утро
 /disableMorning - Выключить доброе утро`)
 })
 
-bot.command('status', (ctx) => {
-    console.log(ctx.session?.goodMorningJob?.enabled)
+bot.command('status', async (ctx) => {
+    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    if (goodMorningChatId.includes(ctx.chat.id)){
+        console.log("Morning Status: ENABLED")
+        ctx.reply("Морнинг енаблед")
+    } else {
+        console.log("Morning Status: DISABLED")
+        ctx.reply("Морнинг дисаблед")
+    }
+
 })
 
 bot.command('enableMorning', async (ctx) => {
     ctx.reply('Влючаю доброе утро)')
-    ctx.session.goodMorningJob = {
-        enabled: true,
-        chatId: ctx.chat.id
-    };
+    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    if (!goodMorningChatId.includes(ctx.chat.id)){
+        goodMorningChatId.push(ctx.chat.id);
+    }
+    redisClient.set("goodMorningChatId",  JSON.stringify(goodMorningChatId));
     enableMorningJob(ctx.chat.id);
 })
-bot.command('disableMorning', (ctx) => {
-    ctx.session.goodMorningJob = null;
+bot.command('disableMorning', async (ctx) => {
+    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    if (goodMorningChatId.includes(ctx.chat.id)){
+        goodMorningChatId.splice(goodMorningChatId.indexOf(ctx.chat.id), 1);
+    }
+    await redisClient.set("goodMorningChatId", JSON.stringify(goodMorningChatId));
     ctx.reply('Ладно, больше не буду(')
 })
 
@@ -69,6 +66,9 @@ bot.launch({
         domain: BOT_CONFIG.WH_ADDRESS,
         port: process.env.PORT || BOT_CONFIG.WH_PORT
     }
+}).then(()=>{
+    console.log("started")
+    console.log()
 })
 
 function enableMorningJob(chatId){
