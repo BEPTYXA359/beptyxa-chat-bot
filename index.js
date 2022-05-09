@@ -15,6 +15,8 @@ const redisURL = process.env.REDIS_URL;
 
 const redisClient = redisURL ? new Redis(redisURL) : new Redis();
 
+let morningAlreadyEnabled = [];
+
 redisClient.on("connect", async ()=>{
     console.log("redis connected to", process.env.REDIS_URL)
 })
@@ -71,6 +73,8 @@ bot.launch({
 
 function enableMorningJob(chatId){
     const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
+        if (morningAlreadyEnabled.includes(chatId)) return;
+        morningAlreadyEnabled.push(chatId);
         let morning = {};
         do {
             try {
