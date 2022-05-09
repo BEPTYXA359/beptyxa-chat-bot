@@ -17,11 +17,6 @@ const redisClient = redisURL ? new Redis(redisURL) : new Redis();
 
 redisClient.on("connect", async ()=>{
     console.log("redis connected to", process.env.REDIS_URL)
-    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
-    goodMorningChatId.forEach(chatId => {
-        enableMorningJob(chatId);
-    })
-    console.log("Good Morning Id: ", goodMorningChatId);
 })
 
 bot.command('help', (ctx) => {
@@ -65,13 +60,17 @@ bot.launch({
     //     domain: BOT_CONFIG.WH_ADDRESS,
     //     port: process.env.PORT || BOT_CONFIG.WH_PORT
     // }
-}).then(()=>{
+}).then(async ()=>{
     console.log("started")
-    console.log()
+    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    goodMorningChatId.forEach(chatId => {
+        enableMorningJob(chatId);
+    })
+    console.log("Good Morning Id: ", goodMorningChatId);
 })
 
 function enableMorningJob(chatId){
-    const goodMorningJob = schedule.scheduleJob({minute:0, tz: "Europe/Moscow"}, async () => {
+    const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
         let morning = {};
         do {
             try {
