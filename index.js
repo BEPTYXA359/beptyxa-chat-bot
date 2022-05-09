@@ -72,9 +72,10 @@ bot.launch({
 })
 
 function enableMorningJob(chatId){
+    if (morningAlreadyEnabled.includes(chatId)) return;
+    morningAlreadyEnabled.push(chatId);
+
     const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
-        if (morningAlreadyEnabled.includes(chatId)) return;
-        morningAlreadyEnabled.push(chatId);
         let morning = {};
         do {
             try {
