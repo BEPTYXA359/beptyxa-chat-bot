@@ -10,10 +10,10 @@ const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
-const redis = require('redis');
+const Redis = require('ioredis');
 const redisURL = process.env.REDIS_URL;
 
-const redisClient = redisURL ? redis.createClient({url: redisURL}) : redis.createClient();
+const redisClient = redisURL ? new Redis(redisURL) : new Redis();
 
 redisClient.on("connect", async ()=>{
     console.log("redis connected to", process.env.REDIS_URL)
@@ -23,8 +23,6 @@ redisClient.on("connect", async ()=>{
     })
     console.log("Good Morning Id: ", goodMorningChatId);
 })
-
-redisClient.connect();
 
 bot.command('help', (ctx) => {
     ctx.reply(`/enableMorning - Включить доброе утро
@@ -73,7 +71,7 @@ bot.launch({
 })
 
 function enableMorningJob(chatId){
-    const goodMorningJob = schedule.scheduleJob({minute:0}, async () => {
+    const goodMorningJob = schedule.scheduleJob({minute:0, tz: "Europe/Moscow"}, async () => {
         let morning = {};
         do {
             try {
