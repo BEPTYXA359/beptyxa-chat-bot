@@ -79,7 +79,7 @@ bot.command('disableMem', async (ctx) => {
     ctx.reply('Ладно, больше не буду мемничать(')
 })
 
-bot.on("text", async (ctx) =>{
+bot.on("text", async (ctx) => {
     //случайная картинка в стиле "мем"
     if (ctx.message.text.toLowerCase() === "мем"){
         let mem;
@@ -94,7 +94,11 @@ bot.on("text", async (ctx) =>{
             await ctx.reply(`Что то не так с мемом: ${error}`);
         }
     }
-    console.log(ctx)
+
+    //случайный ответ другому боту
+    if (ctx.from.is_bot && Math.random()*101 <= 70){
+        ctx.reply(phrases.replyToBot[Math.floor(Math.random() * phrases.mem.length)])
+    }
 })
 
 // Start webhook via launch method (preferred)
