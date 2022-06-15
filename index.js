@@ -8,6 +8,8 @@ const needle = require('needle');
 const BOT_CONFIG = require("./config");
 const bot = new Telegraf(BOT_CONFIG.TOKEN);
 
+const phrases = require("./phrases.json");
+
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const Redis = require('ioredis');
@@ -15,7 +17,10 @@ const redisURL = process.env.REDIS_URL;
 
 const redisClient = redisURL ? new Redis(redisURL) : new Redis();
 
-let morningAlreadyEnabled = [];
+let jobState = {
+    morningAlreadyEnabled: [],
+    memeAlreadyEnabled: []
+}
 
 redisClient.on("connect", async ()=>{
     console.log("redis connected to", process.env.REDIS_URL)
@@ -56,6 +61,42 @@ bot.command('disableMorning', async (ctx) => {
     ctx.reply('Ладно, больше не буду гудмонинговать(')
 })
 
+bot.command('enableMem', async (ctx) => {
+    ctx.reply('Влючаю мемификатор)')
+    let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
+    if (!memChatId.includes(ctx.chat.id)){
+        memChatId.push(ctx.chat.id);
+    }
+    redisClient.set("memChatId",  JSON.stringify(memChatId));
+    enableMemeJob(ctx.chat.id);
+})
+bot.command('disableMem', async (ctx) => {
+    let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
+    if (memChatId.includes(ctx.chat.id)){
+        memChatId.splice(memChatId.indexOf(ctx.chat.id), 1);
+    }
+    await redisClient.set("memChatId", JSON.stringify(memChatId));
+    ctx.reply('Ладно, больше не буду мемничать(')
+})
+
+bot.on("text", async (ctx) =>{
+    //случайная картинка в стиле "мем"
+    if (ctx.message.text.toLowerCase() === "мем"){
+        let mem;
+        try {
+            const response = await needle('get', 'https://www.anekdot.ru/random/mem/');
+            const $ = cheerio.load(response.body);
+            mem = $('.topicbox img').attr('src');
+            const image = await fetch(mem);
+            const buffer = await image.buffer();
+            await ctx.replyWithPhoto({source: buffer}, {caption: phrases.mem[Math.floor(Math.random() * phrases.mem.length)]});
+        } catch (error) {
+            await ctx.reply(`Что то не так с мемом: ${error}`);
+        }
+    }
+    console.log(ctx)
+})
+
 // Start webhook via launch method (preferred)
 bot.launch({
     // webhook: {
@@ -72,8 +113,8 @@ bot.launch({
 })
 
 function enableMorningJob(chatId){
-    if (morningAlreadyEnabled.includes(chatId)) return;
-    morningAlreadyEnabled.push(chatId);
+    if (jobState.morningAlreadyEnabled.includes(chatId)) return;
+    jobState.morningAlreadyEnabled.push(chatId);
 
     const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
         let morning = {};
@@ -92,6 +133,29 @@ function enableMorningJob(chatId){
         const buffer = await image.buffer();
         await bot.telegram.sendAnimation(chatId,{source: buffer}, {caption: morning.text});
         console.log(morning)
+    });
+}
+
+function enableMemeJob(chatId){
+    if (jobState.memeAlreadyEnabled.includes(chatId)) return;
+    jobState.memeAlreadyEnabled.push(chatId);
+
+    const memeJob = schedule.scheduleJob({hour:Math.floor(Math.random() * 24), minute:Math.floor(Math.random() * 60), tz: "Europe/Moscow"}, async () => {
+        let mem;
+        try {
+            const response = await needle('get', 'https://www.anekdot.ru/random/mem/');
+            const $ = cheerio.load(response.body);
+            mem = $('.topicbox img').attr('src');
+            const image = await fetch(mem);
+            const buffer = await image.buffer();
+            await bot.telegram.sendPhoto(chatId, {source: buffer}, {caption: phrases.mem[Math.floor(Math.random() * phrases.randomTimeMem.length)]});
+        } catch (error) {
+            await bot.telegram.sendMessage(chatId,`Что то не так с мемом: ${error}`);
+        }
+
+        jobState.memeAlreadyEnabled.splice(jobState.memeAlreadyEnabled.indexOf(chatId), 1)
+        memeJob.cancel();
+        enableMemeJob(chatId);
     });
 }
 
