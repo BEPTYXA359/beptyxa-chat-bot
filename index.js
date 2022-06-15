@@ -33,6 +33,8 @@ bot.command('help', (ctx) => {
 
 bot.command('status', async (ctx) => {
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
+
     if (goodMorningChatId.includes(ctx.chat.id)){
         console.log("Morning Status: ENABLED")
         ctx.reply("Морнинг енаблед)")
@@ -41,6 +43,13 @@ bot.command('status', async (ctx) => {
         ctx.reply("Морнинг дисаблед)")
     }
 
+    if (memChatId.includes(ctx.chat.id)){
+        console.log("Mem Status: ENABLED")
+        ctx.reply("Мемесы енаблед)")
+    } else {
+        console.log("Mem Status: DISABLED")
+        ctx.reply("Мемесы дисаблед)")
+    }
 })
 
 bot.command('enableMorning', async (ctx) => {
@@ -95,6 +104,7 @@ bot.on("text", async (ctx) => {
         }
     }
 
+    console.log(ctx.from)
     //случайный ответ другому боту
     if (ctx.from.is_bot && Math.random()*101 <= 70){
         ctx.reply(phrases.replyToBot[Math.floor(Math.random() * phrases.mem.length)])
@@ -110,10 +120,15 @@ bot.launch({
 }).then(async ()=>{
     console.log("started")
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
+    let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
     goodMorningChatId.forEach(chatId => {
         enableMorningJob(chatId);
     })
+    memChatId.forEach(chatId => {
+        enableMemeJob(chatId);
+    })
     console.log("Good Morning Id: ", goodMorningChatId);
+    console.log("Memes Id: ", memChatId);
 })
 
 function enableMorningJob(chatId){
