@@ -103,12 +103,6 @@ bot.on("text", async (ctx) => {
             await ctx.reply(`Что то не так с мемом: ${error}`);
         }
     }
-
-    console.log(ctx.from)
-    //случайный ответ другому боту
-    if (ctx.from.is_bot && Math.random()*101 <= 70){
-        ctx.reply(phrases.replyToBot[Math.floor(Math.random() * phrases.mem.length)])
-    }
 })
 
 // Start webhook via launch method (preferred)
@@ -167,7 +161,7 @@ function enableMemeJob(chatId){
             mem = $('.topicbox img').attr('src');
             const image = await fetch(mem);
             const buffer = await image.buffer();
-            await bot.telegram.sendPhoto(chatId, {source: buffer}, {caption: phrases.mem[Math.floor(Math.random() * phrases.randomTimeMem.length)]});
+            await bot.telegram.sendPhoto(chatId, {source: buffer}, {caption: phrases.randomTimeMem[Math.floor(Math.random() * phrases.randomTimeMem.length)]});
         } catch (error) {
             await bot.telegram.sendMessage(chatId,`Что то не так с мемом: ${error}`);
         }
