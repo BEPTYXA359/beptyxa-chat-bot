@@ -31,8 +31,10 @@ redisClient.on("connect", async ()=>{
 })
 
 bot.command('help', (ctx) => {
-    ctx.reply(`/enableMorning - Включить доброе утро
-/disableMorning - Выключить доброе утро`)
+    ctx.reply(`/enable_morning - Включить доброе утро
+/disable_morning - Выключить доброе утро
+/enable_mem - Включить случайный мем
+/disable_mem - Выключить случайный мем`)
 })
 
 bot.command('status', async (ctx) => {
@@ -59,7 +61,7 @@ bot.command('status', async (ctx) => {
     ctx.reply(replyText)
 })
 
-bot.command('enableMorning', async (ctx) => {
+bot.command('enable_morning', async (ctx) => {
     ctx.reply('Влючаю гудморниг)')
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
     if (!goodMorningChatId.includes(ctx.chat.id)){
@@ -68,7 +70,7 @@ bot.command('enableMorning', async (ctx) => {
     redisClient.set("goodMorningChatId",  JSON.stringify(goodMorningChatId));
     enableMorningJob(ctx.chat.id);
 })
-bot.command('disableMorning', async (ctx) => {
+bot.command('disable_morning', async (ctx) => {
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
     if (goodMorningChatId.includes(ctx.chat.id)){
         goodMorningChatId.splice(goodMorningChatId.indexOf(ctx.chat.id), 1);
@@ -77,7 +79,7 @@ bot.command('disableMorning', async (ctx) => {
     ctx.reply('Ладно, больше не буду гудмонинговать(')
 })
 
-bot.command('enableMem', async (ctx) => {
+bot.command('enable_mem', async (ctx) => {
     ctx.reply('Влючаю мемификатор)')
     let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
     if (!memChatId.includes(ctx.chat.id)){
@@ -86,7 +88,7 @@ bot.command('enableMem', async (ctx) => {
     redisClient.set("memChatId",  JSON.stringify(memChatId));
     enableMemeJob(ctx.chat.id);
 })
-bot.command('disableMem', async (ctx) => {
+bot.command('disable_mem', async (ctx) => {
     let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
     if (memChatId.includes(ctx.chat.id)){
         memChatId.splice(memChatId.indexOf(ctx.chat.id), 1);
