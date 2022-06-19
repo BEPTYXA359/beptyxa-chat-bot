@@ -2,11 +2,15 @@ const {Telegraf} = require('telegraf');
 require('dotenv').config();
 const schedule = require('node-schedule');
 
+const {telegrafThrottler} = require('telegraf-throttler');
+
 const cheerio = require('cheerio');
 const needle = require('needle');
 
 const BOT_CONFIG = require("./config");
 const bot = new Telegraf(BOT_CONFIG.TOKEN);
+const throttler = telegrafThrottler();
+bot.use(throttler);
 
 const phrases = require("./phrases.json");
 
@@ -34,22 +38,25 @@ bot.command('help', (ctx) => {
 bot.command('status', async (ctx) => {
     let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
     let memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
+    let replyText = "";
 
     if (goodMorningChatId.includes(ctx.chat.id)){
         console.log("Morning Status: ENABLED")
-        ctx.reply("Морнинг енаблед)")
+        replyText+="Морнинг енаблед)\n"
     } else {
         console.log("Morning Status: DISABLED")
-        ctx.reply("Морнинг дисаблед)")
+        replyText+="Морнинг дисаблед)\n"
     }
 
     if (memChatId.includes(ctx.chat.id)){
         console.log("Mem Status: ENABLED")
-        ctx.reply("Мемесы енаблед)")
+        replyText+="Мемесы енаблед)\n"
     } else {
         console.log("Mem Status: DISABLED")
-        ctx.reply("Мемесы дисаблед)")
+        replyText+="Мемесы дисаблед)\n"
+
     }
+    ctx.reply(replyText)
 })
 
 bot.command('enableMorning', async (ctx) => {
