@@ -35,7 +35,8 @@ bot.on("text", async (ctx) => {
             mem = $('.topicbox img').attr('src');
             const image = await fetch(mem);
             const buffer = await image.buffer();
-            await ctx.replyWithPhoto({source: buffer}, {caption: phrases.mem[Math.floor(Math.random() * phrases.mem.length)]});
+            const emoji = Math.random() * 100 > 70 ? phrases.emoji[Math.floor(Math.random() * phrases.emoji.length)] : '';
+            await ctx.replyWithPhoto({source: buffer}, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
         } catch (error) {
             await ctx.reply(`Что то не так с мемом: ${error}`);
         }
@@ -53,7 +54,8 @@ const enableMemeJob = function (chatId){
             mem = $('.topicbox img').attr('src');
             const image = await fetch(mem);
             const buffer = await image.buffer();
-            await bot.telegram.sendPhoto(chatId, {source: buffer}, {caption: phrases.randomTimeMem[Math.floor(Math.random() * phrases.randomTimeMem.length)]});
+            const emoji = Math.random() * 100 > 70 ? phrases.emoji[Math.floor(Math.random() * phrases.emoji.length)] : '';
+            await bot.telegram.sendPhoto(chatId, {source: buffer}, {caption: `${phrases.randomTimeMem[Math.floor(Math.random() * phrases.randomTimeMem.length)]} ${emoji}`});
         } catch (error) {
             await bot.telegram.sendMessage(chatId,`Что то не так с мемом: ${error}`);
         }
