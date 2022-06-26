@@ -2,11 +2,13 @@ const schedule = require("node-schedule");
 
 require('dotenv').config();
 const bot = require('./bot');
+const server = require("./server");
 const redisClient = require('./redisClient');
 
 require('./commands/service')
 const { enableMorningJob } = require('./commands/morning');
 const { enableMemeJob } = require('./commands/meme');
+require('./commands/games');
 
 // Start webhook via launch method (preferred)
 bot.launch({
@@ -27,6 +29,8 @@ bot.launch({
     console.log("Good Morning Id: ", goodMorningChatId);
     console.log("Memes Id: ", memChatId);
 })
+
+server.listen(process.env.WH_PORT || 3000);
 
 // Enable graceful stop
 process.once('SIGINT', () => {
