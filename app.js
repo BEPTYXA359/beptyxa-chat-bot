@@ -6,6 +6,7 @@ const redisClient = require('./redisClient');
 
 require('./commands/service');
 require('./commands/games');
+require('./commands/tiktok');
 const { enableMorningJob } = require('./commands/morning');
 const { enableMemeJob } = require('./commands/meme');
 

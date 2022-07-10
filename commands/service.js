@@ -2,10 +2,14 @@ const bot = require("../bot");
 const redisClient = require("../redisClient");
 
 bot.command('help', (ctx) => {
-    ctx.reply(`/enable_morning - Включить доброе утро
-/disable_morning - Выключить доброе утро
-/enable_mem - Включить случайный мем
-/disable_mem - Выключить случайный мем`)
+    ctx.reply(`/tiktok + ссылка - Получить ТикТок видео по ссылке
+/status - Узнать статус 
+/enable_morning - Включить случайную открытку утром
+/disable_morning - Выключить случайную открытку утром
+/enable_mem - Включить случайный мем в случайное время
+/disable_mem - Выключить случайный мем в случайное время
+мем - прислать случайный мем
+ссылка на тикток видео - Получить ТикТок видео по ссылке`)
 })
 
 bot.command('status', async (ctx) => {
