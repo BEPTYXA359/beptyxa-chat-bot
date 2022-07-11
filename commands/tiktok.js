@@ -24,7 +24,10 @@ const sendTikTokVideo = async (ctx) => {
 
             //send video to chat
             await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
-            await ctx.replyWithVideo({source: buffer})
+            await ctx.replyWithVideo({source: buffer}, {
+                caption:
+                    `-> ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}\n`
+            })
 
             //delete video url
             ctx.deleteMessage(ctx.message.id);
