@@ -19,6 +19,7 @@ const sendTikTokVideo = async (ctx) => {
         try {
             await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
             const videoLink = await tiktok.tiktokdownload(tikTokLink);
+            console.log('download link', videoLink)
             const video = await fetch(videoLink.nowm);
             const buffer = await video.buffer();
 
