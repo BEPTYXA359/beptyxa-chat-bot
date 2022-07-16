@@ -1,5 +1,5 @@
 const bot = require("../bot");
-const tiktok = require("tiktok-scraper-without-watermark");
+const tiktok = require("tiktok-scraper-ts");
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
@@ -18,9 +18,9 @@ const sendTikTokVideo = async (ctx) => {
     if (tikTokLink.toLowerCase().includes('tiktok.com') && REGEXP_LINK.test(tikTokLink)) {
         try {
             await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
-            const videoLink = await tiktok.tiktokdownload(tikTokLink);
+            const videoLink = await tiktok.fetchVideoNoWaterMark(tikTokLink);
             console.log('download link', videoLink)
-            const video = await fetch(videoLink.nowm);
+            const video = await fetch(videoLink);
             const buffer = await video.buffer();
 
             //send video to chat
