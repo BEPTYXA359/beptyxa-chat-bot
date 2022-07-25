@@ -40,7 +40,7 @@ const enableMemeJob = function (chatId) {
         minute: Math.floor(Math.random() * 60),
         tz: "Europe/Moscow"
     }, async () => {
-        await sendMeme(null, chatId);
+        await sendMeme(chatId);
 
         memeAlreadyEnabled.splice(memeAlreadyEnabled.indexOf(chatId), 1)
         memeJob.cancel();
