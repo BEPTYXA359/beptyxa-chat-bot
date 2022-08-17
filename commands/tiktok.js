@@ -18,16 +18,16 @@ const sendTikTokVideo = async (ctx) => {
     if (tikTokLink.toLowerCase().includes('tiktok.com') && REGEXP_LINK.test(tikTokLink)) {
         try {
             await bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
-            const videoLink = await tiktok.fetchVideoNoWaterMark(tikTokLink);
+            const videoLink = await tiktok.fetchVideo(tikTokLink);
             console.log('download link', videoLink)
-            const video = await fetch(videoLink);
+            const video = await fetch(videoLink.downloadURL);
             const buffer = await video.buffer();
 
             //send video to chat
             await bot.telegram.sendChatAction(ctx.chat.id, 'upload_video');
             await ctx.replyWithVideo({source: buffer}, {
                 caption:
-                    `-> ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}\n`
+                    `-> ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}\n${videoLink.description}`
             })
 
             //delete video url
