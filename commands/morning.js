@@ -29,14 +29,15 @@ const enableMorningJob = function (chatId){
     if (morningAlreadyEnabled.includes(chatId)) return;
     morningAlreadyEnabled.push(chatId);
 
-    const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
+    const goodMorningJob = schedule.scheduleJob({hour:10, minute:00, tz: "Europe/Moscow"}, async () => {
+        console.log('good morning')
         let morning = {};
         do {
             try {
                 const response = await needle('get', 'https://otkrytki-besplatno.ru/');
                 const $ = cheerio.load(response.body);
                 morning.text = $('.nsp_arts.bottom img[alt*="утр"]').attr('alt');
-                morning.image = 'https://otkrytki-besplatno.ru' + $('.nsp_arts.bottom img[alt*="утр"]').attr('src');
+                morning.image = 'http://otkrytki-besplatno.ru' + $('.nsp_arts.bottom img[alt*="утр"]').attr('src');
             } catch (error) {
                 morning.error = `Что то не так с открыткой: ${error}`;
                 await bot.telegram.sendMessage(chatId, `Что то не так с открыткой: ${error}`);
