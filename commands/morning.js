@@ -29,7 +29,7 @@ const enableMorningJob = function (chatId){
     if (morningAlreadyEnabled.includes(chatId)) return;
     morningAlreadyEnabled.push(chatId);
 
-    const goodMorningJob = schedule.scheduleJob({hour:10, minute:00, tz: "Europe/Moscow"}, async () => {
+    const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
         console.log('good morning')
         let morning = {};
         do {
