@@ -18,7 +18,6 @@ const sendTikTokVideo = async (ctx) => {
     if (tikTokLink.toLowerCase().includes('tiktok.com') && REGEXP_LINK.test(tikTokLink)) {
         try {
             bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
-            await getTikTokVideoLinkWithPuppeteer(tikTokLink);
             const videoLink = await getTikTokVideoLinkWithPuppeteer(tikTokLink);
             console.log('download link', videoLink)
             const video = await fetch(videoLink.video.url);
