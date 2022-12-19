@@ -1,4 +1,5 @@
 const bot = require("../bot");
+const redisClient = require('../redisClient');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const puppeteer = require("puppeteer");
 
@@ -32,6 +33,8 @@ const sendTikTokVideo = async (ctx) => {
 
             //delete video url
             ctx.deleteMessage(ctx.message.id);
+            //save cookies
+            await redisClient.set("lastSuccessCookies", JSON.stringify(videoLink.cookies));
         } catch (error) {
             console.log(`<- to ${ctx.message.from.first_name || ''} ${ctx.message.from.last_name || ''}: TikTok Video Failed - ${error}`)
             ctx.reply(`ERROR TikTok: ${error}`)
@@ -47,11 +50,15 @@ const getTikTokVideoLinkWithPuppeteer = async (link) => {
     })).createIncognitoBrowserContext();
     console.log("Browser started");
     const page = await browser.newPage();
-    const tiktokPage = await page.goto(link);
+    const tiktokPage = await page.goto(link, {timeout: 60000});
     console.log("TikTok link loaded");
 
     if (tiktokPage == null) {
         throw new Error("Could not load the desired Page!");
+    }
+
+    if (tiktokPage.status() >= 400){
+        throw new Error(`TikTok page returned status: ${tiktokPage.status()}`);
     }
 
     const html = await tiktokPage.text();
