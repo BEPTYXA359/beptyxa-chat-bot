@@ -1,3 +1,5 @@
+const needle = require("needle");
+
 const bot = require("../bot");
 const redisClient = require('../redisClient');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -19,7 +21,7 @@ const sendTikTokVideo = async (ctx) => {
     if (tikTokLink.toLowerCase().includes('tiktok.com') && REGEXP_LINK.test(tikTokLink)) {
         try {
             bot.telegram.sendChatAction(ctx.chat.id, 'record_video');
-            const videoLink = await getTikTokVideoLinkWithPuppeteer(tikTokLink);
+            const videoLink = await getTikTokVideoLinkWithNeedle(tikTokLink);
             console.log('download link', videoLink)
             const video = await fetch(videoLink.video.url);
             const buffer = await video.buffer();
@@ -42,30 +44,10 @@ const sendTikTokVideo = async (ctx) => {
     }
 }
 
-const getTikTokVideoLinkWithPuppeteer = async (link) => {
-    console.log("Starting browser");
-    const browser = await (await puppeteer.launch({
-        headless: true,
-        args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    })).createIncognitoBrowserContext();
-    console.log("Browser started");
-    const page = await browser.newPage();
-    const tiktokPage = await page.goto(link, {timeout: 60000});
-    console.log("TikTok link loaded");
-
-    if (tiktokPage == null) {
-        throw new Error("Could not load the desired Page!");
-    }
-
-    if (tiktokPage.status() >= 400){
-        throw new Error(`TikTok page returned status: ${tiktokPage.status()}`);
-    }
-
-    const html = await tiktokPage.text();
-
-    const cookies = await page.cookies();
-    console.log(cookies);
-    await browser.close();
+const getTikTokVideoLinkWithNeedle = async (link) => {
+    const response = await needle('get', link, {follow_max: 20, follow_set_cookies: true, follow_set_referer: true});
+    const html = response.body;
+    const cookies = response.cookies;
 
     const endOfJson = html
         .split(`<script id="SIGI_STATE" type="application/json">`)[1]
