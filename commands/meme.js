@@ -54,16 +54,16 @@ const sendMeme = async (chatId) => {
         const response = await needle('get', 'https://www.anekdot.ru/random/mem/');
         const $ = cheerio.load(response.body);
         mem = $('.topicbox img, .topicbox video source').attr('src');
-        const image = await fetch(mem);
-        const buffer = await image.buffer();
         const emoji = Math.random() * 100 > 60 ? phrases.emoji[Math.floor(Math.random() * phrases.emoji.length)] : '';
 
         if (mem.endsWith(".gif")) {
-            await bot.telegram.sendAnimation(chatId, {source: buffer}, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
+            await bot.telegram.sendAnimation(chatId, mem, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
         } else if(mem.endsWith(".mp4")) {
+            const video = await fetch(mem);
+            const buffer = await video.buffer();
             await bot.telegram.sendVideo(chatId, {source: buffer}, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`})
         } else {
-            await bot.telegram.sendPhoto(chatId, {source: buffer}, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
+            await bot.telegram.sendPhoto(chatId, mem, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
         }
     } catch (error) {
         await bot.telegram.sendMessage(chatId, `Что то не так с мемом: ${error}`);
