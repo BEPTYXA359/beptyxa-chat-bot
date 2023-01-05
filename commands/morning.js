@@ -29,7 +29,7 @@ const enableMorningJob = function (chatId){
     if (morningAlreadyEnabled.includes(chatId)) return;
     morningAlreadyEnabled.push(chatId);
 
-    const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
+    const goodMorningJob = schedule.scheduleJob({hour:9, minute:53, tz: "Europe/Moscow"}, async () => {
         console.log('good morning')
         let morning = {};
         do {
@@ -45,7 +45,7 @@ const enableMorningJob = function (chatId){
         } while (morning.text === undefined || morning.error !== undefined)
         const image = await fetch(morning.image);
         const buffer = await image.buffer();
-        await bot.telegram.sendAnimation(chatId,{source: buffer}, {caption: morning.text});
+        await bot.telegram.sendAnimation(chatId,morning.image, {caption: morning.text});
         console.log(morning)
     });
 }
