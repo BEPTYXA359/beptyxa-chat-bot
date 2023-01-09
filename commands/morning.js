@@ -34,7 +34,7 @@ const enableMorningJob = function (chatId){
         let morning = {};
         do {
             try {
-                const response = await needle('get', 'https://otkrytki-besplatno.ru/');
+                const response = await needle('get', 'https://otkrytki-besplatno.ru/', {rejectUnauthorized : false});
                 const $ = cheerio.load(response.body);
                 morning.text = $('.nsp_arts.bottom img[alt*="утр"]').attr('alt');
                 morning.image = 'http://otkrytki-besplatno.ru' + $('.nsp_arts.bottom img[alt*="утр"]').attr('src');
@@ -43,8 +43,6 @@ const enableMorningJob = function (chatId){
                 await bot.telegram.sendMessage(chatId, `Что то не так с открыткой: ${error}`);
             }
         } while (morning.text === undefined || morning.error !== undefined)
-        const image = await fetch(morning.image);
-        const buffer = await image.buffer();
         await bot.telegram.sendAnimation(chatId,morning.image, {caption: morning.text});
         console.log(morning)
     });
