@@ -3,7 +3,6 @@ const needle = require("needle");
 const bot = require("../bot");
 const redisClient = require('../redisClient');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-const puppeteer = require("puppeteer");
 
 const REGEXP_LINK = /^(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})$/i;
 const MAX_TRY = 5;
