@@ -22,17 +22,35 @@ async function connectChatGPT() {
     })
 }
 
-bot.hears(/^э\sбратуха\s(.*)/i, async ctx => {
+bot.hears(/^братуха\s(.*)/i, async ctx => {
     console.log("Ответь как гопник на:" + ctx.message.text)
-    const res = await gptApi.sendMessage("Ответь как гопник-дагестанец с маленьким словарным запасом и матами на:" + ctx.message.text)
+    bot.telegram.sendChatAction(ctx.chat.id, 'typing');
+    const res = await gptApi.sendMessage("Ответь как гопник-татарин с маленьким словарным запасом, со словами паразитами и матами на: " + ctx.message.text)
     console.log(res);
     ctx.reply(res.text)
 })
 
 bot.hears(/^тяночка\s(.*)/i, async ctx => {
     console.log("Ответь как аниме тян на:" + ctx.message.text)
-    const res = await gptApi.sendMessage("Ответь как милая аниме тян отвечает семпаю на:" + ctx.message.text)
+    bot.telegram.sendChatAction(ctx.chat.id, 'typing');
+    const res = await gptApi.sendMessage("Ответь как милая аниме девочка отвечает братику на: " + ctx.message.text)
     console.log(res);
+    ctx.reply(res.text)
+})
+
+bot.hears(/^храз\s(.*)/i, async ctx => {
+    console.log("Ответь как храз на:" + ctx.message.text)
+    bot.telegram.sendChatAction(ctx.chat.id, 'typing');
+    const res = await gptApi.sendMessage("Ответь уважительно и официально как советский учёный по имени Захаров Харитон Радеонович на: " + ctx.message.text)
+    console.log(res, res.choices);
+    ctx.reply(res.text)
+})
+
+bot.hears(/^ара\s(.*)/i, async ctx => {
+    console.log("Ответь как ара на:" + ctx.message.text)
+    bot.telegram.sendChatAction(ctx.chat.id, 'typing');
+    const res = await gptApi.sendMessage("Ответь как дагестанец с дагестанским акцентом на: " + ctx.message.text)
+    console.log(res, res.choices);
     ctx.reply(res.text)
 })
 
