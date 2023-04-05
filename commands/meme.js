@@ -66,7 +66,7 @@ const sendMeme = async (chatId) => {
             await bot.telegram.sendPhoto(chatId, mem, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
         }
     } catch (error) {
-        await bot.telegram.sendMessage(chatId, `Что то не так с мемом: ${error}`);
+        await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с мемом у ${chatId}: ${error}`);
     }
 }
 

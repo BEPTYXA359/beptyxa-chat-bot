@@ -40,7 +40,7 @@ const enableMorningJob = function (chatId){
                 morning.image = 'http://otkrytki-besplatno.ru' + $('.nsp_arts.bottom img[alt*="утр"]').attr('src');
             } catch (error) {
                 morning.error = `Что то не так с открыткой: ${error}`;
-                await bot.telegram.sendMessage(chatId, `Что то не так с открыткой: ${error}`);
+                await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с открыткой у ${chatId}: ${error}`);
             }
         } while (morning.text === undefined || morning.error !== undefined)
         await bot.telegram.sendAnimation(chatId,morning.image, {caption: morning.text});
