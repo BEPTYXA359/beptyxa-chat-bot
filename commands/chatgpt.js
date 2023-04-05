@@ -46,11 +46,11 @@ bot.hears(/^храз\s(.*)/i, async ctx => {
     ctx.reply(res.text)
 })
 
-bot.hears(/^ара\s(.*)/i, async ctx => {
-    console.log("Ответь как ара на:" + ctx.message.text)
+bot.hears(/^азамат\s(.*)/i, async ctx => {
+    console.log("Ответь как азамат на:" + ctx.message.text)
     bot.telegram.sendChatAction(ctx.chat.id, 'typing');
-    const res = await gptApi.sendMessage("Ответь как дагестанец с дагестанским акцентом на: " + ctx.message.text)
-    console.log(res, res.choices);
+    const res = await gptApi.sendMessage("Ответь как казах по имени Азамат с казахским акцентом по русски на: " + ctx.message.text)
+    console.log(res, res.detail.choices);
     ctx.reply(res.text)
 })
 
