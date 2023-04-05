@@ -29,6 +29,13 @@ bot.hears(/^э\sбратуха\s(.*)/i, async ctx => {
     ctx.reply(res.text)
 })
 
+bot.hears(/^тяночка\s(.*)/i, async ctx => {
+    console.log("Ответь как аниме тян на:" + ctx.message.text)
+    const res = await gptApi.sendMessage("Ответь как милая аниме тян отвечает семпаю на:" + ctx.message.text)
+    console.log(res);
+    ctx.reply(res.text)
+})
+
 module.exports = {
     connectChatGPT: connectChatGPT
 };
