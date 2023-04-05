@@ -24,7 +24,7 @@ async function connectChatGPT() {
 
 bot.hears(/^э\sбратуха\s(.*)/i, async ctx => {
     console.log("Ответь как гопник на:" + ctx.message.text)
-    const res = await gptApi.sendMessage("Ответь как гопник-дагестанец с маленьким словарным запасом, со славами паразитами и матами на:" + ctx.message.text)
+    const res = await gptApi.sendMessage("Ответь как гопник-дагестанец с маленьким словарным запасом, со словами паразитами и матами на:" + ctx.message.text)
     console.log(res);
     ctx.reply(res.text)
 })
