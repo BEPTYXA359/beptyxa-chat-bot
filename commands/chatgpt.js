@@ -22,9 +22,9 @@ async function connectChatGPT() {
     })
 }
 
-bot.hears(/^э\sбля\s(.*)/i, async ctx => {
-    console.log(ctx.message.text)
-    const res = await gptApi.sendMessage("Ответь как гопник:", ctx.message.text)
+bot.hears(/^э\sбратуха\s(.*)/i, async ctx => {
+    console.log("Ответь как гопник на:" + ctx.message.text)
+    const res = await gptApi.sendMessage("Ответь как гопник на:" + ctx.message.text)
     console.log(res);
     ctx.reply(res.text)
 })
