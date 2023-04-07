@@ -22,7 +22,7 @@ async function connectChatGPT() {
     })
 }
 
-bot.hears(/^братуха\s(.*)/i, async ctx => {
+bot.hears(/^братуха(.*)/i, async ctx => {
     console.log("Ответь как гопник на:" + ctx.message.text)
     bot.telegram.sendChatAction(ctx.chat.id, 'typing');
     const res = await gptApi.sendMessage("Ответь как гопник-татарин с маленьким словарным запасом, со словами паразитами и матами на: " + ctx.message.text)
@@ -30,7 +30,7 @@ bot.hears(/^братуха\s(.*)/i, async ctx => {
     ctx.reply(res.text)
 })
 
-bot.hears(/^тяночка\s(.*)/i, async ctx => {
+bot.hears(/^тяночка(.*)/i, async ctx => {
     console.log("Ответь как аниме тян на:" + ctx.message.text)
     bot.telegram.sendChatAction(ctx.chat.id, 'typing');
     const res = await gptApi.sendMessage("Ответь как милая аниме девочка отвечает братику на: " + ctx.message.text)
@@ -38,18 +38,18 @@ bot.hears(/^тяночка\s(.*)/i, async ctx => {
     ctx.reply(res.text)
 })
 
-bot.hears(/^храз\s(.*)/i, async ctx => {
-    console.log("Ответь как храз на:" + ctx.message.text)
+bot.hears(/^храз(.*)/i, async ctx => {
+    console.log("Ответь как храз на:" + ctx.message.text.toLowerCase().replace("храз", ""))
     bot.telegram.sendChatAction(ctx.chat.id, 'typing');
-    const res = await gptApi.sendMessage("Ответь уважительно и официально как советский учёный по имени Захаров Харитон Радеонович на: " + ctx.message.text)
+    const res = await gptApi.sendMessage("Ответь уважительно и официально как советский учёный в области нейробиологии по имени Захаров Харитон Радеонович на: " + ctx.message.text.toLowerCase().replace("храз", ""))
     console.log(res, res.choices);
     ctx.reply(res.text)
 })
 
-bot.hears(/^азамат\s(.*)/i, async ctx => {
-    console.log("Ответь как азамат на:" + ctx.message.text)
+bot.hears(/^chatgpt(.*)/i, async ctx => {
+    console.log("Ответь как gtp на:" + ctx.message.text)
     bot.telegram.sendChatAction(ctx.chat.id, 'typing');
-    const res = await gptApi.sendMessage("Ответь как казах по имени Азамат с казахским акцентом по русски на: " + ctx.message.text)
+    const res = await gptApi.sendMessage(ctx.message.text.toLowerCase().replace("chatgpt", ""))
     console.log(res, res.detail.choices);
     ctx.reply(res.text)
 })
