@@ -46,10 +46,10 @@ bot.hears(/^храз(.*)/i, async ctx => {
     ctx.reply(res.text)
 })
 
-bot.hears(/^chatgpt(.*)/i, async ctx => {
+bot.hears(/^чатгпт(.*)/i, async ctx => {
     console.log("Ответь как gtp на:" + ctx.message.text)
     bot.telegram.sendChatAction(ctx.chat.id, 'typing');
-    const res = await gptApi.sendMessage(ctx.message.text.toLowerCase().replace("chatgpt", ""))
+    const res = await gptApi.sendMessage(ctx.message.text.toLowerCase().replace("чатгпт", ""))
     console.log(res, res.detail.choices);
     ctx.reply(res.text)
 })
