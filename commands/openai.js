@@ -16,7 +16,7 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
     )
     const chatCompletion = await openai.chat.completions.create({
         messages: history,
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4-1106-preview',
     });
     history.push(
         { role: 'assistant', content: chatCompletion.choices[0].message.content }
