@@ -7,8 +7,6 @@ const redisClient = require('./redisClient');
 require('./commands/service');
 require('./commands/games');
 require('./commands/tiktok');
-// const chatGPT = require('./commands/chatgpt');
-// chatGPT.connectChatGPT();
 const openAI = require('./commands/openai');
 openAI.connectOpenAI();
 const { enableMorningJob } = require('./commands/morning');

@@ -21,7 +21,24 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
     history.push(
         { role: 'assistant', content: chatCompletion.choices[0].message.content }
     )
+    if (history.length > 10) {
+        history.shift();
+    }
     store.set(ctx.chat.id, history);
+    await ctx.reply(chatCompletion.choices[0].message.content);
+})
+
+bot.hears(/^[\s\S]*/i, async ctx => {
+    console.log("Chatterbox:" + ctx.message.text)
+    if (Math.random() * 100 > 5) return;
+    bot.telegram.sendChatAction(ctx.chat.id, 'typing');
+    const chatCompletion = await openai.chat.completions.create({
+        messages: [
+            { role: 'system', content: process.env.OPENAI_CHATTERBOX_SYSTEM_TEXT },
+            { role: 'user', content: ctx.message.text }
+        ],
+        model: 'gpt-3.5-turbo',
+    });
     await ctx.reply(chatCompletion.choices[0].message.content);
 })
 
