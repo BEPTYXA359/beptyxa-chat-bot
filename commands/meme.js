@@ -25,11 +25,10 @@ bot.command('disable_mem', async (ctx) => {
     await redisClient.set("memChatId", JSON.stringify(memChatId));
     ctx.reply('Ладно, больше не буду мемничать(')
 })
-bot.on("text", async (ctx) => {
+bot.hears(/мем/i, async (ctx) => {
     //случайная картинка в стиле "мем"
-    if (ctx.message.text.toLowerCase() === "мем") {
-        await sendMeme(ctx.chat.id);
-    }
+    console.log(ctx);
+    await sendMeme(ctx.chat.id);
 })
 const enableMemeJob = function (chatId) {
     if (memeAlreadyEnabled.includes(chatId)) return;
@@ -58,7 +57,7 @@ const sendMeme = async (chatId) => {
 
         if (mem.endsWith(".gif")) {
             await bot.telegram.sendAnimation(chatId, mem, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`});
-        } else if(mem.endsWith(".mp4")) {
+        } else if (mem.endsWith(".mp4")) {
             const video = await fetch(mem);
             const buffer = await video.buffer();
             await bot.telegram.sendVideo(chatId, {source: buffer}, {caption: `${phrases.mem[Math.floor(Math.random() * phrases.mem.length)]} ${emoji}`})
