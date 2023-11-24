@@ -2,7 +2,6 @@ const schedule = require("node-schedule");
 
 require('dotenv').config();
 const bot = require('./bot');
-const redisClient = require('./redisClient');
 
 require('./commands/service');
 require('./commands/games');
@@ -11,6 +10,8 @@ const openAI = require('./commands/openai');
 openAI.connectOpenAI();
 const { enableMorningJob } = require('./commands/morning');
 const { enableMemeJob } = require('./commands/meme');
+const memService = require("./services/memeService");
+const morningService = require("./services/morningService");
 
 
 // Start webhook via launch method (preferred)
@@ -20,17 +21,21 @@ bot.launch({
     //     port: process.env.PORT || BOT_CONFIG.WH_PORT
     // }
 }).then(async ()=>{
-    console.log("started")
-    const goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
-    const memChatId = JSON.parse(await redisClient.get("memChatId")) || [];
-    goodMorningChatId.forEach(chatId => {
-        enableMorningJob(chatId);
-    })
-    memChatId.forEach(chatId => {
-        enableMemeJob(chatId);
-    })
-    console.log("Good Morning Id: ", goodMorningChatId);
-    console.log("Memes Id: ", memChatId);
+    try {
+        console.log("started")
+        const goodMorningChatId = await morningService.getAllEnabledUserIds();
+        const memChatId = await memService.getAllEnabledUserIds();
+        goodMorningChatId.forEach(chatId => {
+            enableMorningJob(chatId);
+        })
+        memChatId.forEach(chatId => {
+            enableMemeJob(chatId);
+        })
+        console.log("Good Morning Id: ", goodMorningChatId);
+        console.log("Memes Id: ", memChatId);
+    } catch (error) {
+        await bot.telegram.sendMessage(process.env.ADMIN_ID, `Проблема загрузкой данных по бд: ${error}`);
+    }
 })
 
 // Enable graceful stop

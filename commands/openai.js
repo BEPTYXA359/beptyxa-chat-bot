@@ -32,7 +32,7 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
     }
 })
 
-bot.hears(/^(?!мем$)/i, async ctx => {
+bot.hears(/^(?!\/|мем$).*/i, async ctx => {
     try {
         console.log("Chatterbox:" + ctx.message.text)
         if (Math.random() * 100 > 5) return;

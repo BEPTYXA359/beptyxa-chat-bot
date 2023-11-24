@@ -1,35 +1,51 @@
+const userService = require("../services/userService");
+const morningService = require("../services/morningService");
+
 const bot = require('../bot');
-const redisClient = require('../redisClient');
+
 const schedule = require("node-schedule");
 const needle = require("needle");
 const cheerio = require("cheerio");
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 let morningAlreadyEnabled = [];
 
 bot.command('enable_morning', async (ctx) => {
-    ctx.reply('Влючаю гудморниг)')
-    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
-    if (!goodMorningChatId.includes(ctx.chat.id)){
-        goodMorningChatId.push(ctx.chat.id);
+    try {
+        ctx.reply('Влючаю гудморниг)')
+        enableMorningJob(ctx.chat.id);
+
+        console.log(ctx);
+        console.log(ctx.message.from);
+        console.log(ctx.chat);
+        //upsert user
+        await userService.addUser(ctx.chat.id === ctx.message.from.id ? ctx.message.from : ctx.chat);
+        //enable mem
+        await morningService.enableMorning(ctx.chat.id);
+    } catch (error) {
+        await bot.telegram.sendMessage(process.env.ADMIN_ID, `Проблема с включением открытки у ${ctx.chat.id}: ${error}`);
     }
-    redisClient.set("goodMorningChatId",  JSON.stringify(goodMorningChatId));
-    enableMorningJob(ctx.chat.id);
 })
 bot.command('disable_morning', async (ctx) => {
-    let goodMorningChatId = JSON.parse(await redisClient.get("goodMorningChatId")) || [];
-    if (goodMorningChatId.includes(ctx.chat.id)){
-        goodMorningChatId.splice(goodMorningChatId.indexOf(ctx.chat.id), 1);
+    try {
+        ctx.reply('Ладно, больше не буду гудмонинговать(')
+        //upsert user
+        await userService.addUser(ctx.chat.id === ctx.message.from.id ? ctx.message.from : ctx.chat);
+        //enable mem
+        await morningService.disableMorning(ctx.chat.id);
+    } catch (error) {
+        await bot.telegram.sendMessage(process.env.ADMIN_ID, `Проблема с выключением открытки у ${ctx.chat.id}: ${error}`);
     }
-    await redisClient.set("goodMorningChatId", JSON.stringify(goodMorningChatId));
-    ctx.reply('Ладно, больше не буду гудмонинговать(')
 })
 
 const enableMorningJob = function (chatId){
     if (morningAlreadyEnabled.includes(chatId)) return;
     morningAlreadyEnabled.push(chatId);
 
-    const goodMorningJob = schedule.scheduleJob({hour:10, minute:0, tz: "Europe/Moscow"}, async () => {
+    const goodMorningJob = schedule.scheduleJob({
+        hour: 10,
+        minute: 0,
+        tz: "Europe/Moscow"
+    }, async () => {
         console.log('good morning')
         let morning = {};
         do {
@@ -38,13 +54,22 @@ const enableMorningJob = function (chatId){
                 const $ = cheerio.load(response.body);
                 morning.text = $('.nsp_arts.bottom img[alt*="утр"]').attr('alt');
                 morning.image = 'http://otkrytki-besplatno.ru' + $('.nsp_arts.bottom img[alt*="утр"]').attr('src');
+
+                await bot.telegram.sendAnimation(chatId,morning.image, {caption: morning.text});
+                await morningService.incrementMorningCount(chatId);
+
+                console.log(morning)
             } catch (error) {
-                morning.error = `Что то не так с открыткой: ${error}`;
-                await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с открыткой у ${chatId}: ${error}`);
+                try {
+                    morning.error = `Что то не так с открыткой: ${error}`;
+                    await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с открыткой у ${chatId}: ${error}`);
+                    await morningService.incrementMorningErrorCount(chatId);
+                } catch (error) {
+                    await bot.telegram.sendMessage(process.env.ADMIN_ID, `Проблема с ошибкой открытки у ${chatId}: ${error}`);
+                }
+
             }
         } while (morning.text === undefined || morning.error !== undefined)
-        await bot.telegram.sendAnimation(chatId,morning.image, {caption: morning.text});
-        console.log(morning)
     });
 }
 

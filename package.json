@@ -11,11 +11,10 @@
   "author": "BEPTYXA359",
   "license": "ISC",
   "dependencies": {
-    "canvas": "^2.9.3",
+    "axios": "^1.6.2",
     "chatgpt": "^5.2.2",
     "cheerio": "^1.0.0-rc.2",
     "dotenv": "^16.0.1",
-    "ioredis": "^5.2.3",
     "jsdom": "^20.0.0",
     "needle": "^3.1.0",
     "node-schedule": "^2.1.0",
