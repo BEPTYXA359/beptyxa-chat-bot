@@ -28,6 +28,10 @@ bot.command('disable_mem', async (ctx) => {
     try {
         ctx.reply('Ладно, больше не буду мемничать(')
 
+        if (memeAlreadyEnabled.includes(ctx.chat.id)) {
+            memeAlreadyEnabled.splice(memeAlreadyEnabled.indexOf(ctx.chat.id), 1);
+        }
+
         //upsert user
         await userService.addUser(ctx.chat.id === ctx.message.from.id ? ctx.message.from : ctx.chat);
         //disable mem
@@ -57,6 +61,10 @@ const enableMemeJob = function (chatId) {
         minute: Math.floor(Math.random() * 60),
         tz: "Europe/Moscow"
     }, async () => {
+        if ( !memeAlreadyEnabled.includes(chatId) ) {
+            memeJob.cancel();
+            return;
+        }
         await sendMeme(chatId);
 
         memeAlreadyEnabled.splice(memeAlreadyEnabled.indexOf(chatId), 1)
