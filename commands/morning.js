@@ -49,8 +49,9 @@ const enableMorningJob = function (chatId) {
     console.log("morning enabled for", chatId);
 
     const goodMorningJob = schedule.scheduleJob({
-        hour: 1,
-        minute: 56,
+        hour: 10,
+        minute: 0,
+        second: 0,
         tz: "Europe/Moscow"
     }, async () => {
         console.log('good morning');
