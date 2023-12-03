@@ -26,7 +26,7 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
             history.shift();
         }
         store.set(ctx.chat.id, history);
-        await ctx.reply(chatCompletion.choices[0].message.content);
+        await ctx.replyWithMarkdown(chatCompletion.choices[0].message.content, {reply_to_message_id : ctx.message.message_id});
     } catch (error) {
         await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с openai у ${ctx.chat.id}: ${error}`);
     }
@@ -35,16 +35,28 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
 bot.hears(/^(?!\/|мем$).*/i, async ctx => {
     try {
         console.log("Chatterbox:" + ctx.message.text)
+        let history = store.get(`chatterbox${ctx.chat.id}`) || [];
+        history.push(
+            {role: 'user', content: ctx.message.text}
+        )
+        if (history.length > 10) {
+            history.shift();
+        }
+        store.set(`chatterbox${ctx.chat.id}`, history);
         if (Math.random() * 100 > 5) return;
         bot.telegram.sendChatAction(ctx.chat.id, 'typing');
         const chatCompletion = await openai.chat.completions.create({
             messages: [
                 {role: 'system', content: process.env.OPENAI_CHATTERBOX_SYSTEM_TEXT},
-                {role: 'user', content: ctx.message.text}
+                ...history
             ],
             model: 'gpt-3.5-turbo',
         });
-        await ctx.reply(chatCompletion.choices[0].message.content);
+        await ctx.reply(chatCompletion.choices[0].message.content,  {reply_to_message_id : ctx.message.message_id});
+        history.push(
+            {role: 'assistant', content: chatCompletion.choices[0].message.content}
+        )
+        store.set(`chatterbox${ctx.chat.id}`, history);
     } catch (error) {
         await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с chatterbox у ${ctx.chat.id}: ${error}`);
     }
