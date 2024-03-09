@@ -17,7 +17,7 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
         )
         const chatCompletion = await openai.chat.completions.create({
             messages: history,
-            model: 'gpt-4-1106-preview',
+            model: process.env.CHAT_MODEL,
         });
         history.push(
             {role: 'assistant', content: chatCompletion.choices[0].message.content}
@@ -43,7 +43,7 @@ bot.hears(/^(?!\/|мем$).*/i, async ctx => {
             history.shift();
         }
         store.set(`chatterbox${ctx.chat.id}`, history);
-        if (Math.random() * 100 > 5) return;
+        if (Math.random() * 100 > 1) return;
         bot.telegram.sendChatAction(ctx.chat.id, 'typing');
         const chatCompletion = await openai.chat.completions.create({
             messages: [
