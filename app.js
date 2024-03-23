@@ -5,9 +5,12 @@ const bot = require('./bot');
 
 require('./commands/service');
 require('./commands/games');
-require('./commands/tiktok');
+//require('./commands/tiktok');
+require('./commands/steam');
 const openAI = require('./commands/openai');
+const steam = require('./commands/steam');
 openAI.connectOpenAI();
+steam.connectSteam();
 const { enableMorningJob } = require('./commands/morning');
 const { enableMemeJob } = require('./commands/meme');
 const memService = require("./services/memeService");
