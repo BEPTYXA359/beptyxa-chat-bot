@@ -9,16 +9,24 @@ async function connectSteam() {
 }
 
 bot.hears(REGEXP_LINK, async (ctx) => {
-    const gameMatches = ctx.message.text.match(REGEXP_LINK);
-    const gameDetails = await steam.getGameDetails(gameMatches[1], {
-        language: "russian",
-        currency: "ru",
-        filters: ["price_overview"]
-    });
-    await ctx.reply(
-        gameDetails.price_overview ? gameDetails.price_overview.final_formatted : "Видимо бесплатно",
-        {reply_to_message_id : ctx.message.message_id}
-    );
+    try {
+        const gameMatches = ctx.message.text.match(REGEXP_LINK);
+        const gameDetails = await steam.getGameDetails(gameMatches[1], {
+            language: "russian",
+            currency: "ru",
+            filters: ["price_overview"]
+        });
+        await ctx.reply(
+            gameDetails.price_overview ? gameDetails.price_overview.final_formatted : "Видимо бесплатно",
+            {reply_to_message_id : ctx.message.message_id}
+        );
+    } catch (e) {
+        await ctx.reply(
+            "Какая то тут ошибочка",
+            {reply_to_message_id : ctx.message.message_id}
+        );
+    }
+
 })
 
 module.exports = {
