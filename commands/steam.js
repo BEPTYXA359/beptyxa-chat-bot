@@ -4,16 +4,13 @@ const axios = require('axios');
 const fx = require('money');
 const schedule = require("node-schedule");
 
-let steam = null;
 
 async function connectSteam() {
-    const SteamAPI = await import("steamapi")
-    steam = new SteamAPI.default(process.env.STEAM_API_KEY);
     console.log(fx.base, fx.rates);
     axios
         .get(`https://openexchangerates.org/api/latest.json?app_id=${process.env.EXCHANGE_APP_ID}`)
         .then((res) => {
-            console.log(res);
+            //console.log(res);
             fx.base = res.data.base;
             fx.rates = res.data.rates;
         })
@@ -44,16 +41,30 @@ bot.hears(REGEXP_LINK, async (ctx) => {
     if (fx.rates === {}) return;
     try {
         const gameMatches = ctx.message.text.match(REGEXP_LINK);
-        const gameDetails = await steam.getGameDetails(gameMatches[1], {
-            language: "russian",
-            currency: "kz",
-            filters: ["price_overview"]
-        });
-        console.log(gameDetails.price_overview);
-        await ctx.reply(
-            gameDetails.price_overview ?
-                `~${fx(gameDetails.price_overview.final / 100).from("KZT").to("RUB").toFixed(0)} руб.`
-                : "Видимо бесплатно",
+        const gameDetails = await getGameDetails(gameMatches[1]);
+        let prices = [];
+
+        if (gameDetails.is_free) {
+            prices.push( `_${gameDetails.name.replaceAll('-', '\\-')}_ \\- *Бесплатно*` )
+        } else {
+            gameDetails.package_groups[0].subs.forEach( (sub) => {
+                prices.push( `_${getOptionText(sub.option_text)}_ *\\~ ${getPriceInRub(sub.price_in_cents_with_discount)}*` )
+            })
+        }
+        console.log(prices);
+        const dlcPrices = [];
+        for (const item in gameDetails.dlc) {
+            const dlcData = await getGameDetails(gameDetails.dlc[item]);
+            dlcData.package_groups[0].subs.forEach( (sub) => {
+                dlcPrices.push( `_${getOptionText(sub.option_text)}_ *\\~ ${getPriceInRub(sub.price_in_cents_with_discount)}*` )
+            })
+        }
+        console.log(dlcPrices);
+        const pricesText = prices.join('\n');
+        const dlcText = dlcPrices.length > 0 ? `\n\n_DLC:_\n${dlcPrices.join('\n')}` : '';
+
+        await ctx.replyWithMarkdownV2(
+            `${pricesText}${dlcText}`,
             {reply_to_message_id : ctx.message.message_id}
         );
     } catch (e) {
@@ -65,6 +76,23 @@ bot.hears(REGEXP_LINK, async (ctx) => {
     }
 
 })
+
+const getGameDetails = async (id) => {
+    return (await axios.get("https://store.steampowered.com/api/appdetails", {
+        params: {
+            cc: 'kz',
+            appids: id,
+        }
+    })).data[id].data;
+}
+
+const getPriceInRub = (price) => {
+    return `${fx(price / 100).from("KZT").to("RUB").toFixed(0)}₽`
+}
+
+const getOptionText = (text) => {
+    return text.replaceAll('<span class="discount_original_price">', '~').replaceAll('</span>', '~').replaceAll('-','\\-');
+}
 
 module.exports = {
     connectSteam: connectSteam
