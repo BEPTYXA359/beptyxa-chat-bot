@@ -52,19 +52,9 @@ bot.hears(REGEXP_LINK, async (ctx) => {
             })
         }
         console.log(prices);
-        const dlcPrices = [];
-        for (const item in gameDetails.dlc) {
-            const dlcData = await getGameDetails(gameDetails.dlc[item]);
-            dlcData.package_groups[0].subs.forEach( (sub) => {
-                dlcPrices.push( `_${getOptionText(sub.option_text)}_ *\\~ ${getPriceInRub(sub.price_in_cents_with_discount)}*` )
-            })
-        }
-        console.log(dlcPrices);
-        const pricesText = prices.join('\n');
-        const dlcText = dlcPrices.length > 0 ? `\n\n_DLC:_\n${dlcPrices.join('\n')}` : '';
 
         await ctx.replyWithMarkdownV2(
-            `${pricesText}${dlcText}`,
+            `${prices.join('\n')}`,
             {reply_to_message_id : ctx.message.message_id}
         );
     } catch (e) {
