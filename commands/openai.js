@@ -46,8 +46,9 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
             history.shift();
         }
         store.set(ctx.chat.id, history);
+        console.log(ctx);
         await ctx.replyWithMarkdown(chatCompletion.choices[0].message.content, {reply_to_message_id : ctx.message.message_id});
-        await openaiService.incrementTokensCount(ctx.chat.id, usageInputInfo.usedTokens, usageOutputInfo.usedTokens, usageInfo.usedUSD);
+        await openaiService.incrementTokensCount(ctx.message.from.id, usageInputInfo.usedTokens, usageOutputInfo.usedTokens, usageInfo.usedUSD);
     } catch (error) {
         await bot.telegram.sendMessage(process.env.ADMIN_ID, `Что то не так с openai у ${ctx.chat.id}: ${error}`);
     }
