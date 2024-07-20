@@ -15,6 +15,7 @@ openAI.connectOpenAI();
 steam.connectSteam();
 const { enableMorningJob } = require('./commands/morning');
 const { enableMemeJob } = require('./commands/meme');
+const { enablePhukekJob } = require('./commands/phukek');
 const memService = require("./services/memeService");
 const morningService = require("./services/morningService");
 
