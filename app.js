@@ -2,7 +2,7 @@ const schedule = require("node-schedule");
 
 require('dotenv').config();
 const bot = require('./bot');
-
+require('./commands/phukek');
 require('./commands/service');
 require('./commands/games');
 //require('./commands/tiktok');
@@ -15,7 +15,7 @@ openAI.connectOpenAI();
 steam.connectSteam();
 const { enableMorningJob } = require('./commands/morning');
 const { enableMemeJob } = require('./commands/meme');
-const { enablePhukekJob } = require('./commands/phukek');
+
 const memService = require("./services/memeService");
 const morningService = require("./services/morningService");
 
