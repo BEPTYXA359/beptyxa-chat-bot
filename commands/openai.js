@@ -72,7 +72,7 @@ bot.hears(/^(?!\/|мем$).*/i, async ctx => {
                 {role: 'system', content: process.env.OPENAI_CHATTERBOX_SYSTEM_TEXT},
                 ...history
             ],
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-5-nano',
         });
         await ctx.reply(chatCompletion.choices[0].message.content,  {reply_to_message_id : ctx.message.message_id});
         history.push(
