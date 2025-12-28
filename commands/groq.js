@@ -5,7 +5,6 @@ let store = require('store');
 let groq = null;
 
 async function connectGroq() {
-    console.log("ksad")
     groq = new Groq({
         apiKey: process.env.GROQ_API_KEY
     });
@@ -22,7 +21,7 @@ bot.hears(/^лама(.*)/i, async ctx => {
         )
         const chatCompletion = await groq.chat.completions.create({
             messages: history,
-            model: "llama3-8b-8192",
+            model: "openai/gpt-oss-120b",
         });
         history.push(
             {role: 'assistant', content: chatCompletion.choices[0].message.content}
