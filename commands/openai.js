@@ -19,7 +19,7 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
         history.push( inputMessage );
         usageMessages.push( inputMessage );
         const usageInputInfo = new GPTTokens({
-            model: process.env.CHAT_MODEL,
+            model: "gpt-3.5-turbo",
             messages: [ inputMessage ]
         })
         const chatCompletion = await openai.chat.completions.create({
@@ -30,11 +30,11 @@ bot.hears(/^чатгпт(.*)/i, async ctx => {
         history.push( outputMessage );
         usageMessages.push( outputMessage );
         const usageOutputInfo = new GPTTokens({
-            model: process.env.CHAT_MODEL,
+            model: "gpt-3.5-turbo",
             messages: [ outputMessage ]
         })
         const usageInfo = new GPTTokens({
-            model: process.env.CHAT_MODEL,
+            model: "gpt-3.5-turbo",
             messages: usageMessages
         })
 
