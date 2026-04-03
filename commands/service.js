@@ -2,41 +2,41 @@ const bot = require("../bot");
 const morningService = require("../services/morningService");
 const memService = require("../services/memeService");
 
-bot.command('help', (ctx) => {
+const COMMANDS = {
+    HELP: 'help',
+    STATUS: 'status'
+};
+
+bot.command(COMMANDS.HELP, (ctx) => {
     ctx.reply(`/tiktok + ссылка - Получить ТикТок видео по ссылке
 /status - Узнать статус 
 /enable_morning - Включить случайную открытку утром
 /disable_morning - Выключить случайную открытку утром
 /enable_mem - Включить случайный мем в случайное время
 /disable_mem - Выключить случайный мем в случайное время
-мем - прислать случайный мем
-ссылка на тикток видео - Получить ТикТок видео по ссылке`)
-})
+мем - прислать случайный мем`);
+});
 
-bot.command('status', async (ctx) => {
+bot.command(COMMANDS.STATUS, async (ctx) => {
     try {
-        let goodMorningChatId = await morningService.getAllEnabledUserIds();
-        let memChatId = await memService.getAllEnabledUserIds();
-        let replyText = "";
+        const [goodMorningChatIds, memChatIds] = await Promise.all([
+            morningService.getAllEnabledUserIds(),
+            memService.getAllEnabledUserIds()
+        ]);
 
-        if (goodMorningChatId.includes(ctx.chat.id)){
-            console.log("Morning Status: ENABLED")
-            replyText+="Морнинг енаблед)\n"
-        } else {
-            console.log("Morning Status: DISABLED")
-            replyText+="Морнинг дисаблед)\n"
-        }
+        const isMorningEnabled = goodMorningChatIds.includes(ctx.chat.id);
+        const isMemEnabled = memChatIds.includes(ctx.chat.id);
 
-        if (memChatId.includes(ctx.chat.id)){
-            console.log("Mem Status: ENABLED")
-            replyText+="Мемесы енаблед)\n"
-        } else {
-            console.log("Mem Status: DISABLED")
-            replyText+="Мемесы дисаблед)\n"
+        console.log(`Morning Status: ${isMorningEnabled ? 'ENABLED' : 'DISABLED'}`);
+        console.log(`Mem Status: ${isMemEnabled ? 'ENABLED' : 'DISABLED'}`);
 
-        }
-        ctx.reply(replyText)
+        const replyText = [
+            isMorningEnabled ? "Морнинг енаблед)" : "Морнинг дисаблед)",
+            isMemEnabled ? "Мемесы енаблед)" : "Мемесы дисаблед)"
+        ].join('\n');
+
+        await ctx.reply(replyText);
     } catch (error) {
         await bot.telegram.sendMessage(process.env.ADMIN_ID, `Проблема со статусом у ${ctx.chat.id}: ${error}`);
     }
-})
+});
